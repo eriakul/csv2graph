@@ -56,7 +56,6 @@ def remove_title_row(rows):
                 return rows
     return rows
 
-
 def rows_to_columns(rows, list_of_column_indexes):
     list_of_columns = []
     for i in list_of_column_indexes:

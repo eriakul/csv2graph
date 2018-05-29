@@ -1,0 +1,161 @@
+<!-- The index.html page is created based on the HTML5 Up template, Dimension.
+It displays the home page and has the upload image feature.
+Many edits were made to incorporate it with Flask.
+
+This was created by Cassandra Overney and Enmo Ren.-->
+<!DOCTYPE HTML>
+<html>
+<head>
+    <style>
+
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-btn-wrapper2 {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #textHover1 {
+            display: none;
+            font-size: 14px;
+        }
+
+        #icon1:hover #textHover1 {
+            display: block;
+        }
+
+        #textHover3 {
+            display: none;
+            font-size: 14px;
+        }
+
+        #icon3:hover #textHover3 {
+            display: block;
+        }
+
+    </style>
+
+    <title>GE Easy Graph</title>
+
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" href="../static/assets/css/main5.css"/>
+    <link rel="stylesheet" href="../static/assets/css/ie9.css"/>
+    <link href="../static/toolbar/jquery.toolbar.css" rel="stylesheet"/>
+
+    <noscript>
+        <link rel="stylesheet" href="../static/assets/css/noscript.css"/>
+    </noscript>
+
+    <script>
+
+        function load() {
+            return "/";
+        }
+
+        function load3() {
+            return "/sentiment";
+        }
+
+        function load4() {
+            return "/about";
+        }
+
+        function change_sub() {
+            document.getElementById('subbtn').style.opacity = 1;
+            document.getElementById('upbtn').style.opacity = 0;
+            document.getElementById('upbtn').hidden = true;
+        }
+
+    </script>
+
+</head>
+<body>
+
+<!-- Wrapper -->
+<div id="wrapper">
+
+    <!-- Header with toolbar and upload form -->
+    <header id="header">
+        <div id="toolbar-options" class="hidden">
+            <a href="#" id="icon1"><i class="fa fa-search" onclick="document.location.href= load3()"></i><span
+                    id="textHover1">Sentiment</span></a>
+            <a href="#" id="icon3"><i class="fa fa-qq" onclick="document.location.href= load4()"></i><span
+                    id="textHover3">About</span></a>
+        </div>
+
+        <div id="button">
+            <i class="fa fa-line-chart" onclick="document.location.href=load();" style="font-size:3em;"></i>
+        </div>
+
+        <div class="content">
+            <div class="inner">
+                <h1>GE Easy Graph</h1>
+                <p>A simple and quick way to transform CSV files to elegant graphs.</p>
+            </div>
+        </div>
+
+        <!-- Upload and submit buttons -->
+        <form name="upload" id="upload" method=POST enctype=multipart/form-data action="{{ url_for('upload') }}">
+            <div class="upload-btn-wrapper" id="upbtn">
+                <button class="btn">Upload</button>
+                <input type="file" id="img_file" name="csv" onchange="change_sub()"/>
+            </div>
+            <div class="upload-btn-wrapper2" style="opacity:0;" id="subbtn">
+                <button class="btn" style="vertical-align:middle">Submit</button>
+            </div>
+
+          </form>
+
+        <!-- <form method="post" enctype="multipart/form-data">
+           <div>
+             <label for="file">Choose file to upload</label>
+             <input type="file" id="file" name="file" multiple>
+           </div>
+           <div>
+             <button>Submit</button>
+           </div>
+        </form> -->
+
+
+
+
+    </header>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <p><a href="https://www.geaviation.com/">Affiliated with GE Aviation</a>.</p>
+    </footer>
+
+</div>
+
+<!-- BG -->
+<div id="bg"></div>
+
+<!-- Scripts -->
+<script src="../static/assets/js/jquery.min.js"></script>
+<script src="../static/assets/js/skel.min.js"></script>
+<script src="../static/assets/js/util.js"></script>
+<script src="../static/assets/js/main.js"></script>
+<script src="../static/toolbar/jquery.toolbar.js"></script>
+<script type="text/javascript" src="../static/toolbar/scriptmaybe.js"></script>
+
+</body>
+</html>
