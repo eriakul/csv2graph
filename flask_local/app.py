@@ -4,6 +4,10 @@ code into this python file. In the local version of app.py, it saves the uploade
 upload_imgs folder. Each time the user hits the home icon, the contents of that folder get removed.
 """
 
+
+
+
+
 import os
 from flask import Flask, render_template, request
 from flask_uploads import UploadSet, configure_uploads, DATA
@@ -17,6 +21,20 @@ from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.resources import INLINE
 from bokeh.util.string import encode_utf8
+
+
+
+from bokeh.server.server import Server
+
+server = Server(
+    bokeh_applications,  # list of Bokeh applications
+    io_loop=loop,        # Tornado IOLoop
+    **server_kwargs      # port, num_procs, etc.
+)
+
+# start timers and services and immediately return
+server.start()
+
 
 
 app = Flask(__name__)
@@ -68,7 +86,7 @@ def upload():
     and loads the page with the image and palettes displayed.
     :return: rendered template of image page (known as 'image.html') with the image files and color codes passed in
     """
-    if request.method == 'POST':
+    if request.method == 'POST' or request.method == 'GET':
         if "image" in request.files:
             filename = photos.save(request.files["csv"])
             fullname = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], filename)
@@ -90,7 +108,7 @@ def upload():
         # render template
         script, div = components(fig)
         html = render_template(
-            'upload.html',
+            'uploadstrata.html',
             plot_script=script,
             plot_div=div,
             js_resources=js_resources,
