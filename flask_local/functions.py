@@ -103,8 +103,8 @@ def return_dictionary_of_variables_and_lists(columns):
             if is_text(column[j]):
                 variable_name = variable_name+column[j]+" "
         variable_name = variable_name.strip(" ")
-        if len(variable_name)>30:
-            variable_name = variable_name[:10] + "..." +variable_name[-10:]
+        if len(variable_name)>40:
+            variable_name = variable_name[:15] + "..." +variable_name[-7:]
         #makes list of number values after where non numbers become none
         dictionary[variable_name] = []
         for j in range(index_of_start, len(column)):

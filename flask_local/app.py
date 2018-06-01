@@ -28,6 +28,12 @@ import math
 
 from functions import open_file_into_dictionary
 
+color_palettes = dict(default = ['red', 'green', 'blue', 'purple', 'brown', 'aqua', 'maroon', 'olive', 'gold'],
+                     bold = ['#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22'],
+                     grayscale = ['#252525', '#525252', '#737373', '#969696', '#bdbdbd', '#d9d9d9', '#f0f0f0'],
+                     pastel = ['#b3e2cd', '#fdcdac', '#cbd5e8', '#f4cae4', '#e6f5c9', '#fff2ae', '#f1e2cc', '#cccccc'],
+                     rainbow = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43'])
+
 resources = INLINE
 js_resources = resources.render_js()
 css_resources = resources.render_css()
@@ -68,15 +74,18 @@ def upload():
             dictionary = open_file_into_dictionary(fullname)
             keys = list(key.title() for key in dictionary.keys())
             values = [value for value in dictionary.values()]
-            xy_source = ColumnDataSource(data=dict(xs=[values[0]], ys=[values[1]], labels = [keys[1]],
-            colors = ['red', 'green', 'blue', 'purple', 'brown', 'aqua']))
-            variables_source = ColumnDataSource(data = dict(keys = keys, values = values))
+            color_keys = list(key.title() for key in color_palettes.keys())
+            color_values = [value for value in color_palettes.values()]
 
+            xy_source = ColumnDataSource(data=dict(xs=[values[0]], ys=[values[1]], labels = [keys[1]],
+            colors = color_palettes['default']))
+            variables_source = ColumnDataSource(data = dict(keys = keys, values = values))
+            colors_source = ColumnDataSource(data = dict(color_keys = color_keys, color_values = color_values))
 
             #Create general plot
-            plot = figure(plot_width=800, plot_height=600, toolbar_location = 'left')
+            plot = figure(plot_width=800, plot_height=600, toolbar_location = 'above')
             plot.title.text_font= 'helvetica'
-            plot.title.text_font_size = '24pt'
+            plot.title.text_font_size = '20pt'
             plot.title.align = 'center'
             plot.title.text_font_style = 'normal'
             plot.multi_line(xs = 'xs', ys = 'ys', legend = 'labels', line_color = 'colors', source = xy_source)
@@ -179,14 +188,41 @@ def upload():
 
 
 
+            #Fine-tuning toolbox callbacks
+            legend_labels_callback = CustomJS(args=dict(xy_source = xy_source), code="""
+                var xy_data = xy_source.data;
+                var labels = cb_obj.value;
+                var new_labels = labels.split(", ");
+                xy_data['labels'] = new_labels;
+                xy_source.change.emit();
+             """)
+
+            color_picker_callback = CustomJS(args=dict(xy_source = xy_source, colors_source = colors_source), code="""
+                 var xy_data = xy_source.data;
+                 var colors_data = colors_source.data;
+                 var index = cb_obj.active;
+                 var palette = colors_data['color_values'][index];
+                 xy_data['colors'] = palette;
+                 xy_source.change.emit();
+              """)
+            #Toolbox
+            color_picker = RadioButtonGroup(labels=color_keys, active=0, callback = color_picker_callback)
+            labels_label = Div(text="""<h3>Edit Legend Labels</h3>""", sizing_mode = 'scale_width')
+            legend_labels = TextInput(value="Label 1, Label 2, Label 3...", sizing_mode =  'scale_width')
+            legend_labels.js_on_change('value', legend_labels_callback)
+
+            fine_toolbox = widgetbox(color_picker, labels_label, legend_labels, sizing_mode = 'scale_width')
+
+
 
             #Integrate with html
-            parts = dict(toolbox = toolbox, plot = plot)
+            parts = dict(toolbox = toolbox, plot = plot, fine_toolbox = fine_toolbox)
             script, div = components(parts, INLINE)
             return render_template('plotpage.html',
                                    script=script,
                                    toolbox_div=div['toolbox'],
                                    plot_div=div['plot'],
+                                   fine_toolbox_div = div['fine_toolbox'],
                                    js_resources=INLINE.render_js(),
                                    css_resources=INLINE.render_css())
 
@@ -196,203 +232,6 @@ def upload():
 
             return render_template('index.html')
 
-
-
-
-    # create a plot and style its properties
-
-    # Set up data
-
-
-
-
-        # fig = figure(plot_width=600, plot_height=600)
-        # fig.vbar(
-        #     x=[1, 2, 3, 4],
-        #     width=0.5,
-        #     bottom=0,
-        #     top=[1.7, 2.2, 4.6, 3.9],
-        #     color='navy'
-        # )
-
-        # grab the static resources
-
-
-        # js_resources = INLINE.render_js()
-        # css_resources = INLINE.render_css()
-        #
-        # # render template
-        # script, div = components(fig)
-        # html = render_template(
-        #     'uploadstrata.html',
-        #     plot_script=script,
-        #     plot_div=div,
-        #     js_resources=js_resources,
-        #     css_resources=css_resources,
-        # )
-        # return encode_utf8(html)
-
-    # global crop_count
-    # # initializing variables passed into image.html
-    # bounds = ""
-    # filename2 = ""
-    # color_names1 = []
-    # color_names2 = []
-    # color_names3 = []
-    # hex1 = []
-    # hex2 = []
-    # hex3 = []
-    # rgb1 = []
-    # rgb2 = []
-    # rgb3 = []
-    # if request.method == 'POST':
-    #     # check if user uploaded an image
-    #     if "image" in request.files:
-    #         filename = photos.save(request.files["image"])
-    #         fullname = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], filename)
-    #         img = Image.open(fullname)
-    #         extension = filename.split(".")[-1]
-    #         if extension in ['jpeg', 'jpg', 'JPG', 'JPEG']:
-    #             extension = extension.lower()
-    #         if extension in ['png']:
-    #             extension = extension.lower()
-    #             img = img.convert('RGB')
-    #
-    #         # resize the uploaded image if it is too big
-    #         resized_img = crop_img.resize(img)
-    #         resized_img.save(fullname)
-    #         filename2 = fullname
-    #
-    #         # generate classic palette type
-    #         palette1, rgb1, hex1 = main.generate(img, 3)
-    #         palettes1 = crop_img.crop_palette(palette1)
-    #
-    #         color_names1 = []
-    #
-    #         for ind, color in enumerate(palettes1):
-    #             # save each palette image into the upload_imgs folder
-    #             if ind == 5:
-    #                 name = fullname[0:-1 * (len(extension) + 1)] + "_palette1" + filename[-1 * (len(extension) + 1):]
-    #                 color.save(name)
-    #             else:
-    #                 name = fullname[0:-1 * (len(extension) + 1)] + "_palette1_" + str(ind) + filename[
-    #                                                                                          -1 * (len(extension) + 1):]
-    #                 color.save(name)
-    #             color_names1.append(name)
-    #
-    #         # generate default palette type
-    #         palette2, rgb2, hex2 = main.generate(img, 1)
-    #         palettes2 = crop_img.crop_palette(palette2)
-    #
-    #         color_names2 = []
-    #
-    #         for ind, color in enumerate(palettes2):
-    #             # save each palette image into the upload_imgs folder
-    #             if ind == 5:
-    #                 name = fullname[0:-1 * (len(extension) + 1)] + "_palette2" + filename[-1 * (len(extension) + 1):]
-    #                 color.save(name)
-    #             else:
-    #                 name = fullname[0:-1 * (len(extension) + 1)] + "_palette2_" + str(ind) + filename[
-    #                                                                                          -1 * (len(extension) + 1):]
-    #                 color.save(name)
-    #             color_names2.append(name)
-    #
-    #         # generate analogous palette type
-    #         palette3, rgb3, hex3 = main.generate(img, 2)
-    #         palettes3 = crop_img.crop_palette(palette3)
-    #
-    #         color_names3 = []
-    #
-    #         for ind, color in enumerate(palettes3):
-    #             # save each palette image into the upload_imgs folder
-    #             if ind == 5:
-    #                 name = fullname[0:-1 * (len(extension) + 1)] + "_palette3" + filename[-1 * (len(extension) + 1):]
-    #                 color.save(name)
-    #             else:
-    #                 name = fullname[0:-1 * (len(extension) + 1)] + "_palette3_" + str(ind) + filename[
-    #                                                                                          -1 * (len(extension) + 1):]
-    #                 color.save(name)
-    #             color_names3.append(name)
-    #
-    #     # check if user cropped an image
-    #     if "bounds" in request.form:
-    #         crop_count += 1
-    #         text = request.form['img']
-    #         bounds = request.form['bounds']
-    #         text = str(text[22:])
-    #         img = Image.open(text)
-    #         extension = text.split(".")[-1]
-    #         filename2 = text
-    #         if extension in ['jpeg', 'jpg', 'JPG', 'JPEG']:
-    #             extension = extension.lower()
-    #         if extension in ['png']:
-    #             extension = extension.lower()
-    #             img = img.convert('RGB')
-    #         # crop the image
-    #         cropped_img = crop_img.crop_img(img, bounds)
-    #
-    #         # generate classic palette type
-    #         palette1, rgb1, hex1 = main.generate(cropped_img, 3)
-    #         palettes1 = crop_img.crop_palette(palette1)
-    #
-    #         color_names1 = []
-    #
-    #         for ind, color in enumerate(palettes1):
-    #             # save each palette image into the upload_imgs folder
-    #             if ind == 5:
-    #                 name = filename2[0:-1 * (len(extension) + 1)] + "_palette1_crop" + str(crop_count) + filename2[
-    #                                                                                                      -1 * (len(
-    #                                                                                                          extension) + 1):]
-    #                 color.save(name)
-    #             else:
-    #                 name = filename2[0:-1 * (len(extension) + 1)] + "_palette1_crop" + str(crop_count) + str(
-    #                     ind) + filename2[-1 * (len(extension) + 1):]
-    #                 color.save(name)
-    #             color_names1.append(name)
-    #
-    #         # generate default palette type
-    #         palette2, rgb2, hex2 = main.generate(cropped_img, 1)
-    #         palettes2 = crop_img.crop_palette(palette2)
-    #
-    #         color_names2 = []
-    #
-    #         for ind, color in enumerate(palettes2):
-    #             # save each palette image into the upload_imgs folder
-    #             if ind == 5:
-    #                 name = filename2[0:-1 * (len(extension) + 1)] + "_palette2_crop" + str(crop_count) + filename2[
-    #                                                                                                      -1 * (len(
-    #                                                                                                          extension) + 1):]
-    #                 color.save(name)
-    #             else:
-    #                 name = filename2[0:-1 * (len(extension) + 1)] + "_palette2_crop" + str(crop_count) + str(
-    #                     ind) + filename2[
-    #                            -1 * (len(extension) + 1):]
-    #                 color.save(name)
-    #             color_names2.append(name)
-    #
-    #         # generate analogous palette type
-    #         palette3, rgb3, hex3 = main.generate(cropped_img, 2)
-    #         palettes3 = crop_img.crop_palette(palette3)
-    #
-    #         color_names3 = []
-    #
-    #         for ind, color in enumerate(palettes3):
-    #             # save each palette image into the upload_imgs folder
-    #             if ind == 5:
-    #                 name = filename2[0:-1 * (len(extension) + 1)] + "_palette3_crop" + str(crop_count) + filename2[
-    #                                                                                                      -1 * (len(
-    #                                                                                                          extension) + 1):]
-    #                 color.save(name)
-    #             else:
-    #                 name = filename2[0:-1 * (len(extension) + 1)] + "_palette3_crop" + str(crop_count) + str(
-    #                     ind) + filename2[
-    #                            -1 * (len(extension) + 1):]
-    #                 color.save(name)
-    #             color_names3.append(name)
-    #
-    # return render_template('image.html', filename1=filename2, filename2=color_names1, hex1=hex1, rgb1=rgb1,
-    #                        filename3=color_names2, hex2=hex2, rgb2=rgb2, filename4=color_names3, hex3=hex3, rgb3=rgb3,
-    #                        bounds=bounds)
 
 
 if __name__ == "__main__":
