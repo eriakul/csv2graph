@@ -47,10 +47,13 @@ def is_yes(string):
         return False
 
 def remove_title_row(rows):
+    cut_off = 50
+    if cut_off > len(rows[0]):
+        cut_off = len(rows[0]) - 1
     done = False
     while done == False:
         done = True
-        for index in range(1,6):
+        for index in range(1,cut_off):
             if len([1 for i in rows[index] if is_text(i)]) > len([1 for i in rows[0] if is_text(i)]):
                 done = False
         if done == False:
@@ -100,6 +103,8 @@ def return_dictionary_of_variables_and_lists(columns):
             if is_text(column[j]):
                 variable_name = variable_name+column[j]+" "
         variable_name = variable_name.strip(" ")
+        if len(variable_name)>30:
+            variable_name = variable_name[:10] + "..." +variable_name[-10:]
         #makes list of number values after where non numbers become none
         dictionary[variable_name] = []
         for j in range(index_of_start, len(column)):

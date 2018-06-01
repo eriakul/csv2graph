@@ -19,7 +19,7 @@ from flask import Flask, render_template, jsonify, request, url_for
 from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.resources import INLINE
-from bokeh.models import ColumnDataSource, AjaxDataSource,CustomJS, Slider, Select, RadioButtonGroup, TextInput, RangeSlider, Div, CheckboxButtonGroup
+from bokeh.models import ColumnDataSource, AjaxDataSource,CustomJS, Slider, Select, RadioButtonGroup, TextInput, RangeSlider, Div, CheckboxButtonGroup, CheckboxGroup
 from bokeh.layouts import widgetbox, column, row
 from bokeh.io import output_file, show
 from bokeh.palettes import Spectral6
@@ -87,7 +87,9 @@ def upload():
              axis = plot.xaxis[0]), code="""
                 var xy_data = xy_source.data;
                 var variables_data = variables_source.data;
-                var index = cb_obj.active;
+                var string = cb_obj.value;
+                var keys = variables_data.keys;
+                var index = keys.indexOf(string);
                 var values = variables_data.values;
 
                 var y_length = xy_data['ys'].length;
@@ -100,7 +102,6 @@ def upload():
 
                 xy_source.change.emit();
 
-                var keys = variables_data.keys;
                 var label = keys[index];
                 axis.axis_label = label;
             """)
@@ -156,11 +157,11 @@ def upload():
 
 
             #Create toolbox
-            label_x = Div(text="""X-Axis""", width=200)
-            x_axis = RadioButtonGroup(labels=keys, active=0, callback = x_axis_callback)
-            label_y = Div(text="""Y-Axis""", width=200)
-            y_axis = CheckboxButtonGroup(labels=keys, active=[1], callback = y_axis_callback)
-            label_axes = Div(text="""<br />Modify Labels""", width=200)
+            label_x = Div(text="""<h1>X-Axis</h1>""")
+            x_axis = Select(title= 'Click to change:', options=keys, value = keys[0] + ' (Click to change.)', callback = x_axis_callback)
+            label_y = Div(text="""<br /> <h1>Y-Axis</h1>""")
+            y_axis = CheckboxGroup(labels=keys, active=[1], callback = y_axis_callback)
+            label_axes = Div(text="""<br /><h1>Modify Labels</h1>""")
 
             title_name = TextInput(title="Title", value='Default Title')
             plot.title.text = title_name.value
@@ -188,6 +189,12 @@ def upload():
                                    plot_div=div['plot'],
                                    js_resources=INLINE.render_js(),
                                    css_resources=INLINE.render_css())
+
+        else:
+            for infile in glob.glob('static/uploaded_csv/*'):
+                os.remove(infile)
+
+            return render_template('index.html')
 
 
 
