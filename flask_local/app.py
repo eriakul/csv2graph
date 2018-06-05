@@ -85,10 +85,11 @@ def upload():
             #Create general plot
             plot = figure(plot_width=800, plot_height=600, toolbar_location = 'above')
             plot.title.text_font= 'helvetica'
-            plot.title.text_font_size = '20pt'
+            plot.title.text_font_size = '18pt'
             plot.title.align = 'center'
             plot.title.text_font_style = 'normal'
             plot.multi_line(xs = 'xs', ys = 'ys', legend = 'labels', line_color = 'colors', source = xy_source)
+            plot.min_border = 40
 
 
             #Define callbacks
@@ -206,12 +207,13 @@ def upload():
                  xy_source.change.emit();
               """)
             #Toolbox
+            colors_label = Div(text="""<h3>Change Color Scheme</h3>""", sizing_mode = 'scale_width')
             color_picker = RadioButtonGroup(labels=color_keys, active=0, callback = color_picker_callback)
-            labels_label = Div(text="""<h3>Edit Legend Labels</h3>""", sizing_mode = 'scale_width')
-            legend_labels = TextInput(value="Label 1, Label 2, Label 3...", sizing_mode =  'scale_width')
+            labels_label = Div(text="""<br><h3>Edit Legend Labels</h3>""", sizing_mode = 'scale_width')
+            legend_labels = TextInput(title = 'Warning: Changing the variables will reset the legend labels.', value="Label 1, Label 2, Label 3...", sizing_mode =  'scale_width')
             legend_labels.js_on_change('value', legend_labels_callback)
 
-            fine_toolbox = widgetbox(color_picker, labels_label, legend_labels, sizing_mode = 'scale_width')
+            fine_toolbox = widgetbox(colors_label, color_picker, labels_label, legend_labels, sizing_mode = 'scale_width')
 
 
 
